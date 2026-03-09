@@ -8,7 +8,7 @@ Das Ziel dieses Projekts ist die Entwicklung eines automatisierten Parksystems. 
 
 ## 📝 Vorbereitung
 Als erstes haben wir uns gedanken gemacht wie wir am besten ein Parksystem mit gewissen Bauteilen zusammenstellen.
-Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad erstellen der alle hindernisse berücksichtigt.
+Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad erstellen der alle hindernisse berücksichtigt (ohne LCD Screen).
 
 <img width="1576" height="864" alt="image" src="https://github.com/user-attachments/assets/642e67a2-ee7e-4ed2-b679-6c8b75d4a868" />
 
