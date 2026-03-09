@@ -45,7 +45,7 @@ Während der Entwicklung traten folgende Probleme auf:
     * *Lösung 1*: Austausch des Codes (funktionierte nur temporär).
     * *Lösung 2*: Prüfung der Verkabelung (lockere Kabel verursachten Datenfehler).
 * **Verbindung**: beider Arduinos: Wie verbindet man zwei Arduinos?
-     * *Lösung*: Zwei kabel bei den Amalog pins die bei dem jeweiligen Arduino angeschlossen sind und daten austauschen.
+     * *Lösung*: Zwei kabel bei den Analog pins die bei dem jeweiligen Arduino angeschlossen sind und daten austauschen.
 
 
 ## 👥 Team
