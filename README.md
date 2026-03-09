@@ -10,7 +10,7 @@ Das System basiert auf folgenden Komponenten:
 * **Ultrasonic Distance Sensoren**: Zur Überprüfung der Parkplatzbelegung.
 * **LEDs**: Zur Signalisierung der Belegung (Rot = belegt, Grün = frei).
 * **Servo**: Steuert die Bewegung der Schranke.
-* **Sensor-Eingabe**: Ein Wasserstandssensor, welcher als Touchpad zur Schrankenöffnung fungiert.
+* **Sensor-Eingabe**: Ein kleiner Knop der die Schranke öffnet wenn gedrückt.
 
 
 
