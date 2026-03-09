@@ -1,6 +1,6 @@
 # Smart Parking System 🚗
 
-Ein intelligentes Parkplatz-Managementsystem, entwickelt im Rahmen des Laborunterrichts der Klasse 2IT.
+Ein intelligentes Parkplatz-Managementsystem, entwickelt im Rahmen des Laborunterrichts.
 
 ## 📋 Projektübersicht
 Das Ziel dieses Projekts ist die Entwicklung eines automatisierten Parksystems. Das System erkennt mittels Ultraschallsensoren, ob ein Parkplatz frei oder belegt ist, und visualisiert diesen Status für den Nutzer. Zusätzlich verfügt das System über eine schrankengesteuerte Zufahrt.
