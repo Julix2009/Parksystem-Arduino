@@ -14,7 +14,7 @@ Das System basiert auf folgenden Komponenten:
 
 
 
-[Image of Arduino ultrasonic sensor circuit diagram]
+
 
 
 ## 🚀 Entwicklung & Problemlösung
@@ -26,22 +26,15 @@ Die initiale Planung und der Schaltplan wurden in Tinkercad erstellt.
 Während der Entwicklung traten folgende Probleme auf:
 
 * **Servo-Fehlfunktion**: Der Bewegungsmelder versetzte den Servo in eine fehlerhafte Dauerschleife mit langsamer Bewegung.
-    * *Lösung*: Austausch des Bewegungsmelders gegen einen Wasserstandssensor, der nun als Touch-Schnittstelle dient.
+    * *Lösung*: Austausch des Bewegungsmelders gegen einen Butten.
 * **Display-Fehler**: Das angeschlossene Display zeigte fehlerhafte Zeichen an.
     * *Lösung 1*: Austausch des Codes (funktionierte nur temporär).
     * *Lösung 2*: Prüfung der Verkabelung (lockere Kabel verursachten Datenfehler).
 
-
-
-[Image of Arduino LCD wiring schematic]
-
-
----
-*Referenz-Konzeptbild: [Smart Parking Diagram](https://letsmakeprojects.com/wp-content/uploads/2024/05/smart-parking-1024x590.jpg)*
 
 ## 👥 Team
 * Schneider
 * Massong
 * Schleef
 
-*Labor-Datum: 2.03.2026*
+
