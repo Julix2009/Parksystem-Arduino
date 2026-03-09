@@ -9,10 +9,7 @@ Das Ziel dieses Projekts ist die Entwicklung eines automatisierten Parksystems. 
 Als erstes haben wir uns gedanken gemacht wie wir am besten ein Parksystem mit gewissen Bauteilen zusammenstellen.
 Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad erstellen der alle hindernisse berücksichtigt (ohne LCD Screen).
 
-## 🧠 Gedanke 
-Zwei Sensoren die die "Parkplätze" überwachen ob sie belegt sind, wenn beide belegt sind dann kann man mit dem butten die "Schranke" (Servo) nicht aufmachen.
-Auf einem LCD Screen wird angezeigt wie viele Parklätze belegt sind.
-Außerdem wollen wir noch eine WebApp machen wo man sieht wie viele Parkplätze belegt sind.
+
 
 
 
@@ -23,6 +20,13 @@ Außerdem wollen wir noch eine WebApp machen wo man sieht wie viele Parkplätze 
 
 >Screen Arduino:
 <img width="1463" height="948" alt="image" src="https://github.com/user-attachments/assets/417293d4-87ad-4548-91ad-e445f22b9b19" />
+
+
+## 🧠 Gedanke 
+Zwei Sensoren die die "Parkplätze" überwachen ob sie belegt sind, wenn beide belegt sind dann kann man mit dem butten die "Schranke" (Servo) nicht aufmachen.
+Auf einem LCD Screen wird angezeigt wie viele Parklätze belegt sind.
+Außerdem wollen wir noch eine WebApp machen wo man sieht wie viele Parkplätze belegt sind.
+
 
 ## 🛠 Hardware-Architektur
 Das System basiert auf folgenden Komponenten:
