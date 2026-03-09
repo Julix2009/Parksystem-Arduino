@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: white; text-align: center; padding: 50px; }
+        .card { background: #2d2d2d; padding: 30px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { color: #00d4ff; }
+        #anzahl { font-size: 5rem; font-weight: bold; margin: 20px 0; display: block; color: #4caf50; }
+        button { background: #00d4ff; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #008fb3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Parkhaus Status</h1>
+        <span id="anzahl">--</span>
+        <p>Freie Plätze verfügbar</p>
+        <button id="connect">Mit Parkhaus verbinden</button>
+    </div>
+
+    <script>
+        document.getElementById('connect').onclick = async () => {
+            const port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 9600 });
+            const reader = port.readable.getReader();
+            while (true) {
+                const { value } = await reader.read();
+                const text = new TextDecoder().decode(value);
+                if(text.includes("FREI:")) {
+                    document.getElementById('anzahl').innerText = text.split(":")[1].trim();
+                }
+            }
+        };
+    </script>
+</body>
+</html>
