@@ -10,7 +10,11 @@ Das Ziel dieses Projekts ist die Entwicklung eines automatisierten Parksystems. 
 Als erstes haben wir uns gedanken gemacht wie wir am besten ein Parksystem mit gewissen Bauteilen zusammenstellen.
 Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad erstellen der alle hindernisse berücksichtigt (ohne LCD Screen).
 
+--Main Arduino:
 <img width="1576" height="864" alt="image" src="https://github.com/user-attachments/assets/642e67a2-ee7e-4ed2-b679-6c8b75d4a868" />
+
+--Screen Arduino:
+<img width="1463" height="948" alt="image" src="https://github.com/user-attachments/assets/417293d4-87ad-4548-91ad-e445f22b9b19" />
 
 
 ## 🛠 Hardware-Architektur
