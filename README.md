@@ -20,7 +20,6 @@ Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad
 >Screen Arduino:
 <img width="1463" height="948" alt="image" src="https://github.com/user-attachments/assets/417293d4-87ad-4548-91ad-e445f22b9b19" />
 
-
 ## 🛠 Hardware-Architektur
 Das System basiert auf folgenden Komponenten:
 * **Ultrasonic Distance Sensoren**: Zur Überprüfung der Parkplatzbelegung.
@@ -45,6 +44,8 @@ Während der Entwicklung traten folgende Probleme auf:
 * **Display-Fehler**: Das angeschlossene Display zeigte fehlerhafte Zeichen an.
     * *Lösung 1*: Austausch des Codes (funktionierte nur temporär).
     * *Lösung 2*: Prüfung der Verkabelung (lockere Kabel verursachten Datenfehler).
+* **Verbindung**: beider Arduinos: Wie verbindet man zwei Arduinos?
+     * *Lösung*: Zwei kabel bei den Amalog pins die bei dem jeweiligen Arduino angeschlossen sind und daten austauschen.
 
 
 ## 👥 Team
