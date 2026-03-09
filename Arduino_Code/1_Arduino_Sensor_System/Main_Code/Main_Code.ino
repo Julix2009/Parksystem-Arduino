@@ -1,8 +1,12 @@
 #include <Servo.h>
 #include <Wire.h>
  
-const int trig1 = 2; const int echo1 = 4;
-const int trig2 = 3; const int echo2 = 5;
+const int trig1 = 2; 
+const int trig2 = 3; 
+
+const int echo1 = 4;
+const int echo2 = 5;
+
 const int buttonPin = 7;
 const int servoPin = 6;
  
@@ -29,22 +33,22 @@ void loop() {
   if (d1 >= distanzSchwelle) frei++;
   if (d2 >= distanzSchwelle) frei++;
  
-  // Daten an Display-Arduino (Adresse 8) senden
+  // Daten an anderen Arduino senden für Display
   Wire.beginTransmission(8);
   Wire.write(frei); 
   Wire.endTransmission();
  
-  // Schranken-Logik
+  // Schranke (Servo)
   if (digitalRead(buttonPin) == LOW && frei > 0) {
     meineSchranke.write(90);
-    delay(3000);
+    delay(3000); // damit die Schranke wieder zu geht
     meineSchranke.write(0);
   }
  
-  delay(500); // Etwas langsamer, damit das I2C-Signal nicht "flutet"
+  delay(500); // Damit das prgramm nicht abstürzt
 }
  
-long getDistance(int trig, int echo) {
+long getDistance(int trig, int echo) { // für die zwei Sensoren 
   digitalWrite(trig, LOW); delayMicroseconds(2);
   digitalWrite(trig, HIGH); delayMicroseconds(10);
   digitalWrite(trig, LOW);
