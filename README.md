@@ -5,12 +5,19 @@ Ein intelligentes Parkplatz-Managementsystem, entwickelt im Rahmen des Laborunte
 ## 📋 Projektübersicht
 Das Ziel dieses Projekts ist die Entwicklung eines automatisierten Parksystems. Das System erkennt mittels Ultraschallsensoren, ob ein Parkplatz frei oder belegt ist, und visualisiert diesen Status für den Nutzer. Zusätzlich verfügt das System über eine schrankengesteuerte Zufahrt.
 
+
+## 📝 Vorbereitung
+Als erstes haben wir uns gedanken gemacht wie wir am besten ein Parksystem mit gewissen Bauteilen zusammenstellen.
+Der nächste Schritt war , dass wir uns einen geigneten Schaltplan in Thinkercad erstellen der alle hindernisse berücksichtigt.
+
+<img width="1576" height="864" alt="image" src="https://github.com/user-attachments/assets/642e67a2-ee7e-4ed2-b679-6c8b75d4a868" />
+
+
 ## 🛠 Hardware-Architektur
 Das System basiert auf folgenden Komponenten:
 * **Ultrasonic Distance Sensoren**: Zur Überprüfung der Parkplatzbelegung.
-* **LEDs**: Zur Signalisierung der Belegung (Rot = belegt, Grün = frei).
 * **Servo**: Steuert die Bewegung der Schranke.
-* **Sensor-Eingabe**: Ein kleiner Knop der die Schranke öffnet wenn gedrückt.
+* **Butten-Eingabe**: Ein kleiner Knop der die Schranke öffnet wenn gedrückt.
 
 
 
