@@ -1,4 +1,4 @@
-# Smart Parking System 🚗
+# Smart Parking System 
 
 Ein intelligentes Parkplatz-Managementsystem, entwickelt im Rahmen des Laborunterrichts.
 
