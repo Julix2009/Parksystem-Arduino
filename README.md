@@ -1,4 +1,4 @@
-# Smart Parking System 🚗
+# Smart Parking System 
 
 Ein intelligentes Parkplatz-Managementsystem, entwickelt im Rahmen des Laborunterrichts.
 
@@ -53,9 +53,14 @@ Während der Entwicklung traten folgende Probleme auf:
      * *Lösung*: Zwei kabel bei den Analog pins die bei dem jeweiligen Arduino angeschlossen sind und daten austauschen.
 
 
+## ✨ Demo
+   [![Demo Page](https://img.shields.io/badge/🌐_Live_Demo-GitHub_Pages-blue?style=for-the-badge)](https://julix2009.github.io/Parksystem-Arduino/)
+
 ## 👥 Team
 * Schneider
 * Massong
 * Schleef
+
+
 
 
