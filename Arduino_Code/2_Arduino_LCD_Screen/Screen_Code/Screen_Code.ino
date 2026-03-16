@@ -24,6 +24,8 @@ void setup() {
   delay(1000);
   lcd.clear();
 }
+
+    
  
 void loop() {
   // In der ersten Zeile den Titel anzeigen
