@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<style>
+    body { 
+        font-family: 'Segoe UI', sans-serif; 
+        background: #1f1f1f; 
+        color: white; 
+        padding: 50px; 
+    }
+    .parkplatz-layout { 
+        display: flex; 
+        gap: 30px; 
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+    .parkplatz-card { 
+        background: #2d2d2d; 
+        padding: 30px; 
+        padding-bottom: 60px; 
+        border-radius: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 250px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+     .parkplatz-card h1 { 
+        color: #00d4ff; 
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    .status-text { 
+        font-size: 24px; 
+        font-weight: bold;
+        display: block;
+    }
+    .parkplatz-card.frei .status-text { color: #4caf50; }
+    .parkplatz-card.belegt .status-text { color: #f44336; }
+    .parkplatz-card.warte .status-text { color: #ffeb3b; }
+    button { 
+        background: #00d4ff; 
+        border: none; 
+        padding: 15px 30px; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        cursor: pointer; 
+        margin-top: 30px;
+    }
+    button:hover { background: #008fb3; }
+</style>
+
+<div class="parkplatz-layout">
+    <div id="p1" class="parkplatz-card frei">
+        <h1>Parkplatz 1</h1>
+        <span class="status-text">FREI</span>
+    </div>
+
+    <div id="p2" class="parkplatz-card belegt">
+        <h1>Parkplatz 2</h1>
+        <span class="status-text">BELEGT</span>
+    </div>
+</div>
+</div>
+    <button id="connect">Mit Parkhaus verbinden</button>
+    <button id="simulate">Test-Daten senden</button>
+
+    <script>
+document.getElementById('connect').onclick = async () => {
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+    const reader = port.readable.getReader();
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const text = new TextDecoder().decode(value).trim();
+        
+        // Wir nehmen an, der Text kommt rein als "P1:FREI" oder "P1:BESETZT"
+        if (text.includes(":")) {
+            const parts = text.split(":");
+            const id = parts[0].toLowerCase(); // z.B. "p1"
+            const status = parts[1].trim();    // z.B. "FREI"
+
+            const element = document.getElementById(id);
+            if (element) {
+                if (status === "FREI") {
+                    element.classList.add('status-frei');
+                    element.classList.remove('status-belegt');
+                    element.innerText = id.toUpperCase() + ": Frei";
+                } else {
+                    element.classList.add('status-belegt');
+                    element.classList.remove('status-frei');
+                    element.innerText = id.toUpperCase() + ": Belegt";
+                }
+            }
+        }
+    }
+};
+
+document.getElementById('simulate').onclick = () => {
+    // Wir tun so, als käme ein Signal vom Arduino
+    const dummyDaten = ["p1:FREI", "p1:BELEGT", "p2:FREI", "p2:BELEGT"];
+    const zufall = dummyDaten[Math.floor(Math.random() * dummyDaten.length)];
+    
+    console.log("Simuliere Empfang:", zufall);
+    verarbeiteDaten(zufall); // Wir lagern die Logik in eine eigene Funktion aus
+};
+
+// Diese Funktion nutzt du dann sowohl für den echten Arduino als auch für den Test
+function verarbeiteDaten(text) {
+    if (text.includes(":")) {
+        const [id, status] = text.split(":");
+        const card = document.getElementById(id.toLowerCase().trim());
+        if (card) {
+            card.className = "parkplatz-card " + (status.trim() === "FREI" ? "frei" : "belegt");
+            card.querySelector('.status-text').innerText = status.trim();
+        }
+    }
+}
+    </script>
+</body>
+</html>
