@@ -1,452 +1,159 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Parksystem – Arduino Schulprojekt</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;600;800&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Parkhaus Monitor</title>
+<style>
+    body { 
+        font-family: 'Segoe UI', sans-serif; 
+        background: #1f1f1f; 
+        color: white; 
+        padding: 50px; 
+    }
+    .parkplatz-layout { 
+        display: flex; 
+        gap: 30px; 
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+    }
+    .parkplatz-card { 
+        background: #2d2d2d; 
+        padding: 30px; 
+        padding-bottom: 60px; 
+        border-radius: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+        width: 250px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .parkplatz-card h1 { 
+        color: #00d4ff; 
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    .status-text { 
+        font-size: 24px; 
+        font-weight: bold;
+        display: block;
+    }
+    .parkplatz-card.frei .status-text { color: #4caf50; }
+    .parkplatz-card.belegt .status-text { color: #f44336; }
+    .parkplatz-card.warte .status-text { color: #ffeb3b; }
 
-    :root {
-      --green:  #00ff9d;
-      --cyan:   #00d4ff;
-      --red:    #ff4444;
-      --bg:     #0d0f14;
-      --card:   #13161e;
-      --border: #1e2230;
-      --text:   #c8d0e0;
-      --mono:   'Share Tech Mono', monospace;
-      --sans:   'Barlow', sans-serif;
+    .zusammenfassung {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 1.2rem;
+        color: #aaa;
+    }
+    .zusammenfassung span {
+        font-weight: bold;
+        color: #00d4ff;
+        font-size: 1.5rem;
     }
 
-    html { scroll-behavior: smooth; }
+    button { 
+        background: #00d4ff; 
+        border: none; 
+        padding: 15px 30px; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        cursor: pointer; 
+        margin-top: 30px;
+        margin-right: 10px;
+        color: #000;
+    }
+    button:hover { background: #008fb3; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-weight: 300;
-      min-height: 100vh;
-      overflow-x: hidden;
+    .demo-banner {
+        display: inline-block;
+        background: #ffeb3b;
+        color: #000;
+        font-weight: bold;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        margin-bottom: 24px;
     }
 
-    /* grid overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
+    .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+        color: #aaa;
     }
-
-    /* ─── HEADER ─── */
-    header {
-      position: relative;
-      z-index: 1;
-      padding: 80px 5vw 60px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+    .dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: #ffeb3b;
+        animation: blink 2s infinite;
     }
-
-    .label {
-      font-family: var(--mono);
-      font-size: .75rem;
-      letter-spacing: .18em;
-      color: var(--cyan);
-      text-transform: uppercase;
-    }
-
-    h1 {
-      font-family: var(--sans);
-      font-weight: 800;
-      font-size: clamp(2.4rem, 7vw, 5.5rem);
-      line-height: 1;
-      color: #fff;
-    }
-
-    h1 span { color: var(--green); }
-
-    .tagline {
-      font-size: 1.05rem;
-      max-width: 540px;
-      line-height: 1.7;
-      color: var(--text);
-    }
-
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .badge {
-      font-family: var(--mono);
-      font-size: .72rem;
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--card);
-      color: var(--cyan);
-      letter-spacing: .1em;
-    }
-
-    /* ─── MAIN GRID ─── */
-    main {
-      position: relative;
-      z-index: 1;
-      padding: 60px 5vw;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 720px) { main { grid-template-columns: 1fr; } }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 28px 30px;
-    }
-
-    .card-title {
-      font-family: var(--mono);
-      font-size: .8rem;
-      letter-spacing: .14em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-title::before {
-      content: '';
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      flex-shrink: 0;
-    }
-
-    /* status display card */
-    .status-card { grid-column: 1 / -1; }
-
-    .status-display {
-      background: #0a0c10;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-
-    .slot-group { display: flex; gap: 12px; flex-wrap: wrap; }
-
-    .slot {
-      width: 70px; height: 110px;
-      border: 2px solid #1e2230;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-family: var(--mono);
-      font-size: .65rem;
-      color: #4a5570;
-      position: relative;
-      transition: all .4s;
-    }
-
-    .slot.free  { border-color: var(--green); color: var(--green); }
-    .slot.taken { border-color: var(--red);   color: var(--red);   }
-
-    .slot-icon { font-size: 1.6rem; }
-    .slot-label { letter-spacing: .1em; }
-
-    .counter-wrap { flex: 1; min-width: 160px; }
-    .counter-num {
-      font-family: var(--mono);
-      font-size: 4rem;
-      font-weight: bold;
-      color: var(--green);
-      line-height: 1;
-    }
-    .counter-sub { font-size: .85rem; color: #4a5570; margin-top: 4px; font-family: var(--mono); }
-
-    /* hardware list */
-    .hw-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .hw-list li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: .92rem;
-      color: var(--text);
-    }
-    .hw-list li::before {
-      content: '▸';
-      color: var(--cyan);
-      font-family: var(--mono);
-    }
-
-    /* team */
-    .team-list { display: flex; gap: 12px; flex-wrap: wrap; }
-    .team-chip {
-      background: #0d1018;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 16px;
-      font-family: var(--mono);
-      font-size: .8rem;
-      color: var(--green);
-    }
-
-    /* download section */
-    .download-card {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 24px;
-      border-color: var(--cyan);
-    }
-
-    .download-info h2 {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 6px;
-    }
-    .download-info p { font-size: .9rem; line-height: 1.6; max-width: 480px; }
-
-    .warning-box {
-      background: rgba(255,68,68,.07);
-      border: 1px solid rgba(255,68,68,.25);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-family: var(--mono);
-      font-size: .75rem;
-      color: #ff8080;
-      line-height: 1.6;
-      margin-top: 14px;
-    }
-
-    .btn-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--cyan);
-      color: #000;
-      font-family: var(--mono);
-      font-size: .85rem;
-      font-weight: bold;
-      letter-spacing: .1em;
-      padding: 16px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background .2s, transform .15s;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .btn-download:hover { background: var(--green); transform: translateY(-2px); }
-    .btn-download svg { width: 18px; height: 18px; }
-
-    /* footer */
-    footer {
-      position: relative;
-      z-index: 1;
-      border-top: 1px solid var(--border);
-      padding: 28px 5vw;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-family: var(--mono);
-      font-size: .72rem;
-      color: #2e3650;
-    }
-
-    footer a { color: var(--cyan); text-decoration: none; }
-    footer a:hover { color: var(--green); }
-
-    /* animate on load */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    header, .card { animation: fadeUp .5s ease both; }
-    .card:nth-child(1) { animation-delay: .1s; }
-    .card:nth-child(2) { animation-delay: .18s; }
-    .card:nth-child(3) { animation-delay: .26s; }
-    .card:nth-child(4) { animation-delay: .34s; }
-    .card:nth-child(5) { animation-delay: .42s; }
-  </style>
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
 </head>
 <body>
 
-<header>
-  <div class="label">// Schulprojekt · Arduino · 2026</div>
-  <h1>Smart <span>Park</span>system</h1>
-  <p class="tagline">
-    Automatisiertes Parkplatz-Management mit Ultraschallsensoren, Servo-Schranke
-    und Web-Interface – entwickelt im Laborunterricht.
-  </p>
-  <div class="badges">
-    <span class="badge">C++</span>
-    <span class="badge">HTML / JS</span>
-    <span class="badge">Arduino Uno</span>
-    <span class="badge">Web Serial API</span>
-    <span class="badge">MIT License</span>
-  </div>
-</header>
+<div class="demo-banner">⚡ DEMO MODUS</div>
 
-<main>
+<div class="status-bar">
+    <div class="dot"></div>
+    <span>Simulation aktiv — kein Arduino verbunden</span>
+</div>
 
-  <!-- Live-Demo-Vorschau -->
-  <div class="card status-card">
-    <div class="card-title">Parkhaus Status – Vorschau</div>
-    <div class="status-display">
-      <div class="slot-group" id="slots">
-        <div class="slot free"  id="s1"><span class="slot-icon">🚗</span><span class="slot-label">P1</span><span>FREI</span></div>
-        <div class="slot taken" id="s2"><span class="slot-icon">🚗</span><span class="slot-label">P2</span><span>BELEGT</span></div>
-      </div>
-      <div class="counter-wrap">
-        <div class="counter-num" id="cnt">1</div>
-        <div class="counter-sub">FREIE PLÄTZE</div>
-      </div>
+<div class="zusammenfassung">
+    Freie Plätze: <span id="frei-gesamt">2</span> / 2
+</div>
+
+<div class="parkplatz-layout">
+    <div id="p1" class="parkplatz-card frei">
+        <h1>Parkplatz 1</h1>
+        <span class="status-text">FREI</span>
     </div>
-  </div>
 
-  <!-- Hardware -->
-  <div class="card">
-    <div class="card-title">Hardware-Komponenten</div>
-    <ul class="hw-list">
-      <li>2× Arduino Uno</li>
-      <li>2× Ultraschall-Sensor (HC-SR04)</li>
-      <li>1× Servo-Motor (Schranke)</li>
-      <li>1× LCD-Display (I²C)</li>
-      <li>1× Taster (Schranken-Öffner)</li>
-      <li>Kabel, Breadboard, USB</li>
-    </ul>
-  </div>
-
-  <!-- Funktionen -->
-  <div class="card">
-    <div class="card-title">Funktionsweise</div>
-    <ul class="hw-list">
-      <li>Sensoren überwachen Parkplatzbelegung</li>
-      <li>LCD zeigt freie / belegte Plätze</li>
-      <li>Schranke öffnet nur bei freiem Platz</li>
-      <li>Zwei Arduinos kommunizieren per Analogpin</li>
-      <li>Web-Interface via USB Serial</li>
-    </ul>
-  </div>
-
-  <!-- Team -->
-  <div class="card">
-    <div class="card-title">Team</div>
-    <div class="team-list">
-      <div class="team-chip">Schneider</div>
-      <div class="team-chip">Massong</div>
-      <div class="team-chip">Schleef</div>
+    <div id="p2" class="parkplatz-card frei">
+        <h1>Parkplatz 2</h1>
+        <span class="status-text">FREI</span>
     </div>
-  </div>
+</div>
 
-  <!-- GitHub -->
-  <div class="card" style="display:flex;flex-direction:column;justify-content:center;gap:12px;">
-    <div class="card-title">Repository</div>
-    <p style="font-size:.9rem;line-height:1.6;">
-      Der vollständige Quellcode (Arduino C++ & Web-Interface) ist auf GitHub verfügbar.
-    </p>
-    <a href="https://github.com/Julix2009/Parksystem-Arduino" target="_blank"
-       style="font-family:var(--mono);font-size:.8rem;color:var(--cyan);text-decoration:none;">
-      ↗ github.com/Julix2009/Parksystem-Arduino
-    </a>
-  </div>
-
-  <!-- Download -->
-  <div class="card download-card">
-    <div class="download-info">
-      <h2>Web-Interface herunterladen</h2>
-      <p>
-        Lade die HTML-Datei herunter, öffne sie lokal in Chrome oder Edge
-        und verbinde deinen Arduino per USB – dann siehst du die freien Parkplätze live.
-      </p>
-      <div class="warning-box">
-        ⚠ Benötigt Google Chrome oder Microsoft Edge<br>
-        ⚠ Arduino muss per USB angeschlossen sein<br>
-        ⚠ Arduino-Code muss laufen &amp; Serial auf 9600 Baud
-      </div>
-    </div>
-    <div style="display:flex;flex-direction:row;gap:12px;flex-shrink:0;flex-wrap:wrap;">
-      <a href="https://download-directory.github.io/?url=https://github.com/Julix2009/Parksystem-Arduino/tree/main/Arduino_Code" target="_blank" class="btn-download">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        ARDUINO CODE
-      </a>
-      <a href="https://download-directory.github.io/?url=https://github.com/Julix2009/Parksystem-Arduino/tree/main/Arduino_Web_Interface" target="_blank" class="btn-download">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
-        </svg>
-        WEB INTERFACE
-      </a>
-    </div>
-  </div>
-
-</main>
-
-<footer>
-  <span>© 2026 Schneider · Massong · Schleef — MIT License</span>
-  <a href="https://github.com/Julix2009/Parksystem-Arduino" target="_blank">GitHub Repo ↗</a>
-</footer>
+<div>
+    <button id="btn-simulate">▶ Test-Daten senden</button>
+</div>
 
 <script>
-  // Slot animation demo
-  const slots = [
-    { el: document.getElementById('s1'), free: true },
-    { el: document.getElementById('s2'), free: false },
-  ];
-  const cnt = document.getElementById('cnt');
+const simStates = [
+    { P1: 'FREI',   P2: 'FREI'   },
+    { P1: 'BELEGT', P2: 'FREI'   },
+    { P1: 'FREI',   P2: 'BELEGT' },
+    { P1: 'BELEGT', P2: 'BELEGT' },
+];
+let simIndex = 0;
 
-  function update(states) {
-    let free = 0;
-    states.forEach((s, i) => {
-      slots[i].el.className = 'slot ' + (s ? 'free' : 'taken');
-      slots[i].el.children[2].textContent = s ? 'FREI' : 'BELEGT';
-      if (s) free++;
-    });
-    cnt.textContent = free;
-    cnt.style.color = free === 0 ? 'var(--red)' : 'var(--green)';
-  }
+function updateCard(id, status) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.className = 'parkplatz-card ' + (status === 'FREI' ? 'frei' : 'belegt');
+    card.querySelector('.status-text').innerText = status;
+}
 
-  // cycle through demo states
-  const demos = [
-    [true, false],
-    [true, true],
-    [false, false],
-    [false, true],
-  ];
-  let di = 0;
-  setInterval(() => {
-    di = (di + 1) % demos.length;
-    update(demos[di]);
-  }, 2000);
+function updateFrei() {
+    const p1frei = document.getElementById('p1').classList.contains('frei');
+    const p2frei = document.getElementById('p2').classList.contains('frei');
+    document.getElementById('frei-gesamt').textContent = (p1frei ? 1 : 0) + (p2frei ? 1 : 0);
+}
+
+document.getElementById('btn-simulate').onclick = () => {
+    const s = simStates[simIndex % simStates.length];
+    simIndex++;
+    updateCard('p1', s.P1);
+    updateCard('p2', s.P2);
+    updateFrei();
+};
 </script>
 
 </body>
