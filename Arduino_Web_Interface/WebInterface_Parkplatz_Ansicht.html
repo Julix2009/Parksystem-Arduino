@@ -25,7 +25,7 @@
         text-align: center;
         transition: transform 0.2s;
     }
-     .parkplatz-card h1 { 
+    .parkplatz-card h1 { 
         color: #00d4ff; 
         font-size: 1.5rem;
         margin-bottom: 20px;
@@ -38,6 +38,19 @@
     .parkplatz-card.frei .status-text { color: #4caf50; }
     .parkplatz-card.belegt .status-text { color: #f44336; }
     .parkplatz-card.warte .status-text { color: #ffeb3b; }
+
+    .zusammenfassung {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 1.2rem;
+        color: #aaa;
+    }
+    .zusammenfassung span {
+        font-weight: bold;
+        color: #00d4ff;
+        font-size: 1.5rem;
+    }
+
     button { 
         background: #00d4ff; 
         border: none; 
@@ -46,79 +59,167 @@
         font-weight: bold; 
         cursor: pointer; 
         margin-top: 30px;
+        margin-right: 10px;
+        color: #000;
     }
     button:hover { background: #008fb3; }
+    button:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+    #btn-disconnect {
+        background: #f44336;
+        color: white;
+        display: none;
+    }
+    #btn-disconnect:hover { background: #c62828; }
+
+    .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+    .dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: #f44336;
+        transition: background 0.3s;
+    }
+    .dot.online { background: #4caf50; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 </style>
+</head>
+<body>
+
+<div class="status-bar">
+    <div id="dot" class="dot"></div>
+    <span id="status-label">Nicht verbunden</span>
+</div>
+
+<div class="zusammenfassung">
+    Freie Plätze: <span id="frei-gesamt">–</span> / 2
+</div>
 
 <div class="parkplatz-layout">
-    <div id="p1" class="parkplatz-card frei">
+    <div id="p1" class="parkplatz-card warte">
         <h1>Parkplatz 1</h1>
-        <span class="status-text">FREI</span>
+        <span class="status-text">WARTE...</span>
     </div>
 
-    <div id="p2" class="parkplatz-card belegt">
+    <div id="p2" class="parkplatz-card warte">
         <h1>Parkplatz 2</h1>
-        <span class="status-text">BELEGT</span>
+        <span class="status-text">WARTE...</span>
     </div>
 </div>
+
+<div>
+    <button id="btn-connect">Mit Parkhaus verbinden</button>
+    <button id="btn-simulate">Test-Daten senden</button>
+    <button id="btn-disconnect">Trennen</button>
 </div>
-    <button id="connect">Mit Parkhaus verbinden</button>
-    <button id="simulate">Test-Daten senden</button>
 
-    <script>
-document.getElementById('connect').onclick = async () => {
-    const port = await navigator.serial.requestPort();
-    await port.open({ baudRate: 9600 });
-    const reader = port.readable.getReader();
+<script>
+let port = null;
+let reader = null;
+let buffer = '';
 
-    while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+const dot = document.getElementById('dot');
+const statusLabel = document.getElementById('status-label');
+const freiGesamt = document.getElementById('frei-gesamt');
+const btnConnect = document.getElementById('btn-connect');
+const btnDisconnect = document.getElementById('btn-disconnect');
 
-        const text = new TextDecoder().decode(value).trim();
-        
-        // Wir nehmen an, der Text kommt rein als "P1:FREI" oder "P1:BESETZT"
-        if (text.includes(":")) {
-            const parts = text.split(":");
-            const id = parts[0].toLowerCase(); // z.B. "p1"
-            const status = parts[1].trim();    // z.B. "FREI"
-
-            const element = document.getElementById(id);
-            if (element) {
-                if (status === "FREI") {
-                    element.classList.add('status-frei');
-                    element.classList.remove('status-belegt');
-                    element.innerText = id.toUpperCase() + ": Frei";
-                } else {
-                    element.classList.add('status-belegt');
-                    element.classList.remove('status-frei');
-                    element.innerText = id.toUpperCase() + ": Belegt";
-                }
-            }
-        }
-    }
-};
-
-document.getElementById('simulate').onclick = () => {
-    // Wir tun so, als käme ein Signal vom Arduino
-    const dummyDaten = ["p1:FREI", "p1:BELEGT", "p2:FREI", "p2:BELEGT"];
-    const zufall = dummyDaten[Math.floor(Math.random() * dummyDaten.length)];
-    
-    console.log("Simuliere Empfang:", zufall);
-    verarbeiteDaten(zufall); // Wir lagern die Logik in eine eigene Funktion aus
-};
-
-// Diese Funktion nutzt du dann sowohl für den echten Arduino als auch für den Test
 function verarbeiteDaten(text) {
-    if (text.includes(":")) {
-        const [id, status] = text.split(":");
-        const card = document.getElementById(id.toLowerCase().trim());
-        if (card) {
-            card.className = "parkplatz-card " + (status.trim() === "FREI" ? "frei" : "belegt");
-            card.querySelector('.status-text').innerText = status.trim();
-        }
-    }
+    text = text.trim();
+    if (!text) return;
+
+    // Format vom Arduino: "P1:FREI,P2:BELEGT,FREI:1"
+    const parts = {};
+    text.split(',').forEach(seg => {
+        const [k, v] = seg.split(':');
+        if (k && v) parts[k.trim()] = v.trim();
+    });
+
+    if (parts['P1']) updateCard('p1', parts['P1']);
+    if (parts['P2']) updateCard('p2', parts['P2']);
+
+    // Freie Plätze zählen
+    const p1frei = document.getElementById('p1').classList.contains('frei');
+    const p2frei = document.getElementById('p2').classList.contains('frei');
+    freiGesamt.textContent = (p1frei ? 1 : 0) + (p2frei ? 1 : 0);
 }
-    </script>
+
+function updateCard(id, status) {
+    const card = document.getElementById(id);
+    if (!card) return;
+    card.className = 'parkplatz-card ' + (status === 'FREI' ? 'frei' : 'belegt');
+    card.querySelector('.status-text').innerText = status;
+}
+
+// Arduino verbinden
+btnConnect.onclick = async () => {
+    try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        dot.classList.add('online');
+        statusLabel.textContent = 'Verbunden mit Arduino';
+        btnConnect.disabled = true;
+        btnDisconnect.style.display = 'inline-block';
+
+        reader = port.readable.getReader();
+
+        (async () => {
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += new TextDecoder().decode(value);
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    lines.forEach(verarbeiteDaten);
+                }
+            } catch (e) {
+                setOffline();
+            }
+        })();
+
+    } catch (e) {
+        statusLabel.textContent = 'Fehler: ' + e.message;
+    }
+};
+
+// Trennen
+btnDisconnect.onclick = async () => {
+    try {
+        if (reader) { await reader.cancel(); reader = null; }
+        if (port) { await port.close(); port = null; }
+    } catch (e) {}
+    setOffline();
+};
+
+function setOffline() {
+    dot.classList.remove('online');
+    statusLabel.textContent = 'Nicht verbunden';
+    btnConnect.disabled = false;
+    btnDisconnect.style.display = 'none';
+}
+
+// Simulation (durchläuft alle Zustände)
+const simStates = [
+    'P1:FREI,P2:FREI,FREI:2',
+    'P1:BELEGT,P2:FREI,FREI:1',
+    'P1:FREI,P2:BELEGT,FREI:1',
+    'P1:BELEGT,P2:BELEGT,FREI:0',
+];
+let simIndex = 0;
+
+document.getElementById('btn-simulate').onclick = () => {
+    verarbeiteDaten(simStates[simIndex % simStates.length]);
+    simIndex++;
+};
+</script>
+
 </body>
 </html>
